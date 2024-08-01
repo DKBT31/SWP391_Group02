@@ -25,7 +25,7 @@ const worksOnRoutes = require('./routes/worksOn');
   app.use(cookieParser())
   app.use(express.urlencoded({ extended: true }))
 
-  const allowedOrigins = ['http://localhost:3000', 'https://frontend-chk2.onrender.com'];
+  const allowedOrigins = ['http://localhost:3000', 'https://frontend-chk2.onrender.com', 'https://swp-391-group020-frontend.vercel.app'];
 
   app.use(cors({
     origin: function (origin, callback) {
@@ -46,6 +46,10 @@ const worksOnRoutes = require('./routes/worksOn');
     console.log(req.path, req.method)
     next()
   })
+
+  app.get('/', (req, res) => {
+    res.send('Hello, world!');
+  });
 
   //router
   app.use('/api/user', userRoutes)
