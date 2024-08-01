@@ -2,8 +2,9 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:4000/api',
+    //baseURL: 'http://localhost:4000/api',
     // baseURL: 'https://backend-j9ne.onrender.com/api',
+    baseURL: 'https://swp-391-group02-backend.vercel.app/api',
 });
 
 axiosInstance.interceptors.request.use(
