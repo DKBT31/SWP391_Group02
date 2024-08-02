@@ -109,7 +109,7 @@ app.use('/api/works-on', worksOnRoutes);
     amount: price,
     description: `Payment for the order #${transID}`,
     bank_code: "",
-    callback_url: "swp-391-group02-backend.vercel.app/callback",
+    callback_url: "https://swp-391-group02-backend.vercel.app/callback",
   };
 
     // appid|app_trans_id|appuser|amount|apptime|embeddata|item
