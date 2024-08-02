@@ -109,7 +109,7 @@ app.use('/api/works-on', worksOnRoutes);
     amount: price,
     description: `Payment for the order #${transID}`,
     bank_code: "",
-    callback_url: "https://backend-j9ne.onrender.com/callback",
+    callback_url: "swp-391-group02-backend.vercel.app",
   };
 
     // appid|app_trans_id|appuser|amount|apptime|embeddata|item
