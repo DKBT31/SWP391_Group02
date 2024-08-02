@@ -125,7 +125,6 @@ const JewelryForm = ({ initialValues, onSubmit }) => {
   const [open, setOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
-
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -136,7 +135,6 @@ const JewelryForm = ({ initialValues, onSubmit }) => {
         setGemstones(gemstonesRes.data);
         setMaterials(materialsRes.data);
       } catch (error) {
-        console.error('Failed to fetch options', error);
       }
     };
 
@@ -149,7 +147,6 @@ const JewelryForm = ({ initialValues, onSubmit }) => {
       available: initialValues.available ?? false,
       gemstone_ids: initialValues.gemstone_ids.length > 0 ? initialValues.gemstone_ids.map(gem => gem._id) : [], // Changed from gemstone_id to gemstone_ids
       subgemstone_ids: initialValues.subgemstone_ids.length > 0 ? initialValues.subgemstone_ids.map(subgem => subgem._id) : [],
-      subgemstone_quantity: initialValues.subgemstone_quantity ?? 0,
       material_id: initialValues.material_id?._id || '',
     },
     validationSchema: Yup.object({
@@ -158,11 +155,6 @@ const JewelryForm = ({ initialValues, onSubmit }) => {
       price: Yup.number().required("Required.").typeError("Must be a number"),
       gemstone_ids: Yup.array().of(Yup.string()).nullable(),
       subgemstone_ids: Yup.array().of(Yup.string()).nullable(),
-      subgemstone_quantity: Yup.number()
-        .typeError("Must be a number")
-        .integer("Must be an integer")
-        .min(0, "Must be a natural number")
-        .nullable(),
       material_id: Yup.string().required("Required."),
       material_weight: Yup.number().required("Required.").typeError("Must be a number"),
       category: Yup.string().required("Required."),
@@ -195,7 +187,6 @@ const JewelryForm = ({ initialValues, onSubmit }) => {
           draggable: true,
         })
       } catch (error) {
-        console.error(error)
         toast.error(error, {
           autoClose: 5000, // Auto close after 5 seconds
           closeOnClick: true,
@@ -299,13 +290,29 @@ const JewelryForm = ({ initialValues, onSubmit }) => {
     const selectedGemstoneIds = formik.values.gemstone_ids.map(gem => gem);
     const selectedSubGemstoneIds = formik.values.subgemstone_ids.map(gem => gem);
     const allSelectedIds = new Set([...selectedGemstoneIds, ...selectedSubGemstoneIds]);
-    return gemstones.filter(gem => (gem.available === true && !allSelectedIds.has(gem._id)) || gem._id === formik.values.gemstone_ids[index]);
+    const gemstoneIdsDefault = [
+      ...new Set([
+          ...(initialValues?.subgemstone_ids?.map(gem => gem._id) || []),
+          ...(initialValues?.gemstone_ids?.map(gem => gem._id) || [])
+      ])
+    ];
+    const gemstoneAvailableAgain = gemstoneIdsDefault.filter(id => !allSelectedIds.has(id));
+    console.log(gemstoneAvailableAgain)
+    return gemstones.filter(gem =>
+      (gem.available === true && !allSelectedIds.has(gem._id)) || gem._id === formik.values.gemstone_ids[index] || gemstoneAvailableAgain.includes(gem._id));
   };
   const getFilteredSubGemstones = (index) => {
     const selectedGemstoneIds = formik.values.gemstone_ids.map(gem => gem);
     const selectedSubGemstoneIds = formik.values.subgemstone_ids.map(gem => gem);
     const allSelectedIds = new Set([...selectedGemstoneIds, ...selectedSubGemstoneIds]);
-    return gemstones.filter(gem => (gem.available === true && !allSelectedIds.has(gem._id)) || gem._id === formik.values.subgemstone_ids[index]);
+    const gemstoneIdsDefault = [
+      ...new Set([
+          ...(initialValues?.subgemstone_ids?.map(gem => gem._id) || []),
+          ...(initialValues?.gemstone_ids?.map(gem => gem._id) || [])
+      ])
+    ];
+    const gemstoneAvailableAgain = gemstoneIdsDefault.filter(id => !allSelectedIds.has(id));
+    return gemstones.filter(gem => (gem.available === true && !allSelectedIds.has(gem._id)) || gem._id === formik.values.subgemstone_ids[index] || gemstoneAvailableAgain.includes(gem._id));
   };
   const handleAddGemstone = () => {
     formik.setFieldValue('gemstone_ids', [...formik.values.gemstone_ids, '']); // Add a new empty field
@@ -326,6 +333,7 @@ const JewelryForm = ({ initialValues, onSubmit }) => {
   };
 
   const handleSubGemstoneChange = (index, value) => {
+    console.log(index)
     const updatedSubGemstoneIds = [...formik.values.subgemstone_ids];
     updatedSubGemstoneIds[index] = value;
     formik.setFieldValue('subgemstone_ids', updatedSubGemstoneIds);

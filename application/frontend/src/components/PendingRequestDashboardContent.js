@@ -126,7 +126,6 @@ const PendingRequestDashboardContent = () => {
             setTotalPages(response.data.totalPages);
             setTotal(response.data.total)
         } catch (error) {
-            console.error("There was an error fetching the requests!", error);
             toast.error('There was an error fetching the requests!', {
                 autoClose: 5000, // Auto close after 5 seconds
                 closeOnClick: true,
@@ -161,7 +160,6 @@ const PendingRequestDashboardContent = () => {
             handleCloseAllDialogs();
             fetchRequests();
         } catch (error) {
-            console.error("There was an error saving the request!", error);
             toast.error(error.response?.data?.error || error.message, {
                 autoClose: 5000, // Auto close after 5 seconds
                 closeOnClick: true,
@@ -218,6 +216,11 @@ const PendingRequestDashboardContent = () => {
     useEffect(() => {
         fetchRequests();
     }, [searchParams, page]);
+
+    const getTimestamp = (request) => {
+        const status = request.status_history.find(history => history.status === 'pending');
+        return status ? new Date(status.timestamp).toLocaleDateString() : 'N/A';
+    }
 
     return (
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
@@ -282,6 +285,7 @@ const PendingRequestDashboardContent = () => {
                                     <CustomTableCell sx={{ fontWeight: "bold" }}>Request ID</CustomTableCell>
                                     <CustomTableCell sx={{ fontWeight: "bold" }}>Sender</CustomTableCell>
                                     <CustomTableCell sx={{ fontWeight: "bold" }}>Request Status</CustomTableCell>
+                                    <CustomTableCell sx={{ fontWeight: "bold" }}>Send Date</CustomTableCell>
                                     <CustomTableCell sx={{ fontWeight: "bold" }} align="center">Description</CustomTableCell>
                                     <CustomTableCell sx={{ fontWeight: "bold" }} align="center">Actions</CustomTableCell>
                                 </TableRow>
@@ -292,6 +296,7 @@ const PendingRequestDashboardContent = () => {
                                         <CustomTableCell sx={{ fontWeight: "bold" }}>{request._id}</CustomTableCell>
                                         <CustomTableCell>{request.user_id ? request.user_id.email : 'N/A'}</CustomTableCell>
                                         <CustomTableCell style={{ textTransform: 'capitalize' }}>{capitalizeWords(request.request_status)}</CustomTableCell>
+                                        <CustomTableCell>{getTimestamp(request)}</CustomTableCell>
                                         <CustomTableCell>
                                             <CustomButton1 color="primary" onClick={() => handleDescriptionDetailOpen(request)}>Details</CustomButton1>
                                         </CustomTableCell>

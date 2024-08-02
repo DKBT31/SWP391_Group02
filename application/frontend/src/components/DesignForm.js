@@ -46,7 +46,7 @@ const validationSchema = Yup.object({
 });
 
 export default function DesignForm({ initialValues, onSubmit }) {
-    const [images, setImages] = useState(initialValues.jewelry_id.images || []);
+    const [images, setImages] = useState(initialValues?.jewelry_id?.images || []);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [removedImages, setRemovedImages] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -78,21 +78,20 @@ export default function DesignForm({ initialValues, onSubmit }) {
             removedImages.forEach((image) => {
                 formData.append('removedImages', image);
             });
-
-            formData.append('gemstone_id', values.gemstone_id);
+            
+            // Append the arrays of _id strings to FormData as JSON strings
             formData.append('material_id', initialValues.jewelry_id.material_id._id);
-            formData.append('subgemstone_id', values.subgemstone_id);
-            formData.append('subgemstone_quantity', values.subgemstone_quantity);
-
+            formData.append('gemstone_ids', values.jewelry_id.gemstone_ids.map(gem => gem._id));
+            formData.append('subgemstone_ids', values.jewelry_id.subgemstone_ids.map(subgem => subgem._id));
+            
             Object.keys(initialValues.jewelry_id).forEach(key => {
-                if (key !== 'images' && key !== 'gemstone_id' && key !== 'material_id' && key !== 'subgemstone_id' && key !== 'subgemstone_quantity') {
-                    formData.append(key, initialValues.jewelry_id[key]);
+                if (key !== 'images' && key !== 'material_id' && key !== 'gemstone_ids' && key !== 'subgemstone_ids') {
+                    formData.append(key, values.jewelry_id[key]);
                 }
             });
             try {
                  await onSubmit(values, formData);
             } catch (error) {
-                console.error(error)
                 toast.error(error)
             }
             setLoading(false);

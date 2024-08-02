@@ -123,7 +123,6 @@ export default function RequestForm({ initialValues, onSubmit, fetchData, closeA
                 });
             }
         } catch (error) {
-            console.error("There was an error saving the jewelry!", error);
             toast.error(error.response?.data?.error || error.message, {
                 autoClose: 5000, // Auto close after 5 seconds
                 closeOnClick: true,
@@ -148,7 +147,6 @@ export default function RequestForm({ initialValues, onSubmit, fetchData, closeA
                 closeOnClick: true,
                 draggable: true,
             })
-            console.error(error.response ? error.response.data.error : error.message);
         }
     }
 
@@ -163,7 +161,6 @@ export default function RequestForm({ initialValues, onSubmit, fetchData, closeA
             });
             // fetchData();
         } catch (error) {
-            console.error('Error while updating design', error);
             toast.error('Design update fail', {
                 autoClose: 5000, // Auto close after 5 seconds
                 closeOnClick: true,
@@ -218,7 +215,6 @@ export default function RequestForm({ initialValues, onSubmit, fetchData, closeA
                         label="Request Status"
                         error={formik.touched.request_status && Boolean(formik.errors.request_status)}
                     >
-                        <CustomMenuItem value="pending">Pending</CustomMenuItem>
                         <CustomMenuItem value="assigned">Assigned</CustomMenuItem>
                         <CustomMenuItem value="quote">Quote</CustomMenuItem>
                         <CustomMenuItem value="accepted">Accepted</CustomMenuItem>

@@ -11,7 +11,7 @@ const ObjectId = mongoose.Types.ObjectId;
 // get all requests
 const getRequests = async (req, res) => {
   const { search, request_status, page = 1, limit = 10 } = req.query;
-  const uid  = req.id;
+  const uid = req.id;
   const role = req.role;
 
   try {
@@ -33,20 +33,12 @@ const getRequests = async (req, res) => {
     }
 
     // Role-based query adjustments
-    if (role === "sale_staff") {
-      query.$or = [
-        { request_status: "assigned" },
-        { request_status: "warranty" }
-      ];
-    } else if (role === "design_staff") {
+    if (role === "design_staff") {
       query.request_status = "design";
     } else if (role === "production_staff") {
       query.request_status = "production";
-    } 
-    // else if (role === "manager") {
-    //   query.request_status = { $ne: 'pending' };
-    // }
-    
+    }
+
     if (role !== 'manager') {
       // Fetch associated WorksOn entries for the user
       const worksOnEntries = await WorksOn.find({ staff_ids: { $elemMatch: { staff_id: uid } } });
@@ -58,22 +50,22 @@ const getRequests = async (req, res) => {
 
     // Fetch requests with pagination and population
     const requests = await Request.find(query)
-    .skip(skip)
-    .limit(parseInt(limit))
-    .sort({ createdAt: -1 })
-    .populate({
-      path: 'user_id',
-      select: 'email',
-      match: userFilter
-    })
-    .populate({
-      path: 'jewelry_id',
-      populate: [
-        { path: 'material_id' },
-        { path: 'gemstone_ids' },
-        { path: 'subgemstone_ids' }
-      ]
-    });
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'user_id',
+        select: 'email',
+        match: userFilter
+      })
+      .populate({
+        path: 'jewelry_id',
+        populate: [
+          { path: 'material_id' },
+          { path: 'gemstone_ids' },
+          { path: 'subgemstone_ids' }
+        ]
+      });
 
     // Count total requests for pagination
     const totalRequests = await Request.countDocuments(query);
@@ -110,7 +102,6 @@ const getRequest = async (req, res) => {
 
     res.status(200).json(request);
   } catch (error) {
-    console.error('Error fetching request:', error);
     res.status(500).json({ error: "An error occurred while fetching request" });
   }
 };
@@ -127,7 +118,15 @@ const getUserRequests = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const requests = await Request.find({ user_id: _id })
-      .populate('jewelry_id')
+      .populate({
+        path: 'jewelry_id',
+        populate: [
+          { path: 'material_id' },
+          { path: 'gemstone_ids' },
+          { path: 'subgemstone_ids' }
+        ]
+      })
+      .populate('user_id')
       .sort({ createdAt: -1 }) // Sort by creation date in descending order
       .skip(skip)
       .limit(parseInt(limit));
@@ -142,7 +141,6 @@ const getUserRequests = async (req, res) => {
       currentPage: parseInt(page),
     });
   } catch (error) {
-    console.error('Error fetching request:', error);
     res.status(500).json({ error: "An error occurred while fetching your requests" });
   }
 };
@@ -168,7 +166,6 @@ const getUserRequest = async (req, res) => {
 
     res.status(200).json(requests);
   } catch (error) {
-    console.error('Error fetching request:', error);
     res.status(500).json({ error: "An error occurred while fetching your requests" });
   }
 };
@@ -214,7 +211,7 @@ const createRequest = async (req, res) => {
   // Add to the database
   try {
     const request = await Request.create(newRequest);
-    
+
     const manager = await User.findOne({ role: "manager" });
 
     const worksOn = new WorksOn({
@@ -229,7 +226,6 @@ const createRequest = async (req, res) => {
 
     res.status(201).json(request);
   } catch (error) {
-    console.error('Error creating request:', error);
     res.status(500).json({ error: "Error while creating request" });
   }
 };
@@ -273,7 +269,7 @@ const updateRequest = async (req, res) => {
     }
 
     // Validate request status
-    const allowedRequestStatuses = ['pending', 'assigned', 'accepted', 'completed', 'quote', 'deposit_design', 'design', 'design_completed', 'deposit_production','production', 'warranty', 'payment', 'cancelled'];
+    const allowedRequestStatuses = ['pending', 'assigned', 'accepted', 'completed', 'quote', 'deposit_design', 'design', 'design_completed', 'deposit_production', 'production', 'warranty', 'payment', 'cancelled'];
     if (request_status && !allowedRequestStatuses.includes(request_status)) {
       return res.status(400).json({ error: "Invalid request status" });
     }
@@ -336,18 +332,18 @@ const updateRequest = async (req, res) => {
 
     // Update status history
     if (request_status) {
-        const now = new Date();
-        const statusIndex = existingRequest.status_history.findIndex(entry => entry.status === request_status);
-    
-        if (statusIndex !== -1) {
-            if (!existingRequest.status_history[statusIndex].timestamp) {
-                existingRequest.status_history[statusIndex].timestamp = now;
-            }
-        } else {
-            existingRequest.status_history.push({ status: request_status, timestamp: now });
+      const now = new Date();
+      const statusIndex = existingRequest.status_history.findIndex(entry => entry.status === request_status);
+
+      if (statusIndex !== -1) {
+        if (!existingRequest.status_history[statusIndex].timestamp) {
+          existingRequest.status_history[statusIndex].timestamp = now;
         }
+      } else {
+        existingRequest.status_history.push({ status: request_status, timestamp: now });
+      }
     }
-  
+
 
     // Prepare update fields
     const updateFields = {
@@ -380,7 +376,6 @@ const updateRequest = async (req, res) => {
 
     res.status(200).json({ message: "Update successfully", updatedRequest });
   } catch (error) {
-    console.error('Error updating request:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -427,7 +422,6 @@ const createOrderRequest = async (req, res) => {
     const request = await Request.create(newRequest);
     res.status(201).json(request);
   } catch (error) {
-    console.error('Error creating order request:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -467,7 +461,6 @@ const userFeedbackQuote = async (req, res) => {
 
     res.status(200).json({ message: "Feedback updated successfully", updatedRequest });
   } catch (error) {
-    console.error('Error updating request:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -506,7 +499,6 @@ const managerFeedbackQuote = async (req, res) => {
 
     res.status(200).json({ message: "Feedback updated successfully", updatedRequest });
   } catch (error) {
-    console.error('Error updating request:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -546,7 +538,6 @@ const userFeedbackDesign = async (req, res) => {
 
     res.status(200).json({ message: "Feedback updated successfully", updatedRequest });
   } catch (error) {
-    console.error('Error updating request:', error);
     res.status(500).json({ error: error.message });
   }
 };

@@ -59,7 +59,6 @@ export default function MaterialDashboard() {
             const response = await axiosInstance.get('/materials');
             setMaterials(response.data);
         } catch (error) {
-            console.error("There was an error fetching the materials!", error);
             toast.error('Fetch material fail', {
                 autoClose: 5000,
                 closeOnClick: true,
@@ -83,7 +82,6 @@ export default function MaterialDashboard() {
                 draggable: true,
             });
         } catch (error) {
-            console.error('Error deleting material:', error);
             toast.error('Delete material fail', {
                 autoClose: 5000,
                 closeOnClick: true,
@@ -115,7 +113,6 @@ export default function MaterialDashboard() {
                 draggable: true,
             });
         } catch (error) {
-            console.error("There was an error saving the material!", error);
             toast.error('Fail', {
                 autoClose: 5000,
                 closeOnClick: true,
@@ -138,18 +135,20 @@ export default function MaterialDashboard() {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <CustomTableCell sx={{ fontWeight: "bold" }} align='center'>Name</CustomTableCell>
-                            <CustomTableCell sx={{ fontWeight: "bold" }} align='center'>Buy Price</CustomTableCell>
-                            <CustomTableCell sx={{ fontWeight: "bold" }} align='center'>Sell Price</CustomTableCell>
+                            <CustomTableCell sx={{ fontWeight: "bold" }}>ID</CustomTableCell>
+                            <CustomTableCell sx={{ fontWeight: "bold" }}>Name</CustomTableCell>
+                            <CustomTableCell sx={{ fontWeight: "bold" }}>Buy Price</CustomTableCell>
+                            <CustomTableCell sx={{ fontWeight: "bold" }}>Sell Price</CustomTableCell>
                             <CustomTableCell sx={{ fontWeight: "bold" }} align='center'>Action</CustomTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {materials.map(material => (
                             <TableRow key={material._id}>
-                                <CustomTableCell align='center' sx={{ fontWeight: "bold" }}>{material.name}</CustomTableCell>
-                                <CustomTableCell align='center'>{material.buy_price && material.buy_price.toLocaleString() + '₫'}</CustomTableCell>
-                                <CustomTableCell align='center'>{material.sell_price && material.sell_price.toLocaleString() + '₫'}</CustomTableCell>
+                                <CustomTableCell sx={{ fontWeight: "bold" }}>{material._id}</CustomTableCell>
+                                <CustomTableCell>{material.name}</CustomTableCell>
+                                <CustomTableCell>{material.buy_price && material.buy_price.toLocaleString() + '₫'}</CustomTableCell>
+                                <CustomTableCell>{material.sell_price && material.sell_price.toLocaleString() + '₫'}</CustomTableCell>
                                 <CustomTableCell align='center'>
                                     <StyledIconButton onClick={() => handleEditClick(material)}>
                                         <Edit fontSize='large' />
